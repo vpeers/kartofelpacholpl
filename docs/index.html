@@ -6,6 +6,7 @@ kartofelpachol.pl -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
+
 <style>
   .video-wrapper { position: relative; width: 100%; padding-bottom: 56.25%; height: 0; }
   .recaptcha-box {
@@ -57,29 +58,39 @@ kartofelpachol.pl -->
 <!-- Load YouTube API -->
 <script src="https://www.youtube.com/iframe_api"></script>
 <script>
-let player;
+let apiReady = false;
+
+function onYouTubeIframeAPIReady() {
+  apiReady = true;
+}
 
 document.getElementById('fakeCaptcha').addEventListener('click', function(){
   const box = document.getElementById('checkbox');
   box.classList.add('checked');
+
   setTimeout(() => {
+    if (!apiReady) {
+      console.warn("YouTube API not ready yet. Retrying...");
+      setTimeout(arguments.callee, 200); // wait and retry until API is ready
+      return;
+    }
+
     const container = document.getElementById('videoContainer');
     container.innerHTML = '<div id="player"></div>';
-    // Create the player using YouTube IFrame API
-    player = new YT.Player('player', {
+
+    new YT.Player('player', {
       height: '100%',
       width: '100%',
       videoId: 'KSPxHniCtmw', // your video ID
       playerVars: {
         autoplay: 1,
-        mute: 1, // start muted so autoplay is allowed
+        mute: 1, // required to start autoplay
         rel: 0
       },
       events: {
         'onReady': (event) => {
           event.target.playVideo();
-          // Immediately unmute - works because this is still inside user click context
-          event.target.unMute();
+          event.target.unMute(); // unmute right away (still user gesture)
         }
       }
     });
