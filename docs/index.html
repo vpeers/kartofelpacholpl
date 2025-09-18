@@ -6,12 +6,8 @@ kartofelpachol.pl -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Fake reCAPTCHA Easter Egg</title>
 <style>
-  .video-wrapper {
-    position: relative; width: 100%; padding-bottom: 56.25%; height: 0;
-  }
-  /* Fake reCAPTCHA box */
+  .video-wrapper { position: relative; width: 100%; padding-bottom: 56.25%; height: 0; }
   .recaptcha-box {
     position: absolute; top: 0; left: 0; width: 100%; height: 100%;
     display:flex; align-items:center; justify-content:center;
@@ -38,17 +34,9 @@ kartofelpachol.pl -->
     content:"✓";
     color:white; font-size:16px; font-weight:bold;
   }
-  .text {
-    font-size:14px; color:#000;
-  }
-  .logo {
-    margin-left:auto;
-    font-size:10px; color:#888;
-    display:flex; flex-direction:column; align-items:center;
-  }
-  .logo img {
-    width:16px; height:16px; margin-bottom:2px;
-  }
+  .text { font-size:14px; color:#000; }
+  .logo { margin-left:auto; font-size:10px; color:#888; display:flex; flex-direction:column; align-items:center; }
+  .logo img { width:16px; height:16px; margin-bottom:2px; }
 </style>
 </head>
 <body>
@@ -66,20 +54,35 @@ kartofelpachol.pl -->
   </div>
 </div>
 
+<!-- Load YouTube API -->
+<script src="https://www.youtube.com/iframe_api"></script>
 <script>
+let player;
+
 document.getElementById('fakeCaptcha').addEventListener('click', function(){
   const box = document.getElementById('checkbox');
   box.classList.add('checked');
-  // slight delay for effect
   setTimeout(() => {
     const container = document.getElementById('videoContainer');
-    const iframe = document.createElement('iframe');
-    iframe.src = "https://www.youtube.com/embed/KSPxHniCtmw?autoplay=1&mute=1&rel=0";
-    iframe.style.cssText = "top:0;left:0;width:100%;height:100%;position:absolute;border:0;";
-    iframe.allowFullscreen = true;
-    iframe.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share');
-    container.innerHTML = ""; // replace captcha with iframe
-    container.appendChild(iframe);
+    container.innerHTML = '<div id="player"></div>';
+    // Create the player using YouTube IFrame API
+    player = new YT.Player('player', {
+      height: '100%',
+      width: '100%',
+      videoId: 'KSPxHniCtmw', // your video ID
+      playerVars: {
+        autoplay: 1,
+        mute: 1, // start muted so autoplay is allowed
+        rel: 0
+      },
+      events: {
+        'onReady': (event) => {
+          event.target.playVideo();
+          // Immediately unmute - works because this is still inside user click context
+          event.target.unMute();
+        }
+      }
+    });
   }, 600);
 });
 </script>
